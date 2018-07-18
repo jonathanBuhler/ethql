@@ -2,7 +2,7 @@ import Contract from 'web3/eth/contract';
 import EthqlAccount from '../../model/core/EthqlAccount';
 import EthqlTransaction from '../../model/core/EthqlTransaction';
 import { EthqlContext } from '../../model/EthqlContext';
-import { TxDecoderDefinition } from '../types';
+import { DecoderDefinition } from '../types';
 import { createAbiDecoder, extractParamValue } from '../utils';
 
 class ERC721TokenContract {
@@ -40,24 +40,24 @@ class ERC721TokenHolder {
 }
 
 interface ERC721Transaction {
-  tokenContract: ERC721TokenContract
-  sender: EthqlAccount
+  tokenContract: ERC721TokenContract;
+  sender: EthqlAccount;
 }
 
 interface ERC721Transfer extends ERC721Transaction {
-  from: ERC721TokenHolder
-  to: ERC721TokenHolder
-  tokenID: number
+  from: ERC721TokenHolder;
+  to: ERC721TokenHolder;
+  tokenID: number;
 }
 
 interface ERC721Approve extends ERC721Transaction {
-  approved: ERC721TokenHolder
-  tokenID: number
+  approved: ERC721TokenHolder;
+  tokenID: number;
 }
 
 interface ERC721setApprovalForAll extends ERC721Transaction {
-  operator: ERC721TokenHolder
-  approved: boolean
+  operator: ERC721TokenHolder;
+  approved: boolean;
 }
 
 type ERC721Bindings = {
@@ -65,10 +65,10 @@ type ERC721Bindings = {
   transferFrom: ERC721Transfer;
   approve: ERC721Approve;
   setApprovalForAll: ERC721setApprovalForAll;
-}
+};
 
-
-class ERC721Token implements TxDecoderDefinition<ERC721Bindings> {
+class ERC721Token {
+  //implements DecoderDefinition<Erc721TxBindings, Erc20LogBindings> {
   public readonly entity = 'token';
   public readonly standard = 'ERC721';
   public readonly decoder = createAbiDecoder(__dirname + '../../../abi/erc721.json');
@@ -115,15 +115,15 @@ class ERC721Token implements TxDecoderDefinition<ERC721Bindings> {
 
     setApprovalForAll: (decoded: any, tx: EthqlTransaction, context: EthqlContext) => {
       const tokenContract = new ERC721TokenContract(tx.to, context);
-      const operator = extractParamValue(decoded.params, '_operator')
+      const operator = extractParamValue(decoded.params, '_operator');
       return {
         tokenContract,
         sender: tx.from,
         operator: new ERC721TokenHolder(operator, tokenContract),
         approved: extractParamValue(decoded.params, '_approved'),
       };
-    }
-  }
+    },
+  };
 }
 
 export default ERC721Token;
